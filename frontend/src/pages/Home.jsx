@@ -15,7 +15,15 @@ function getErrorMessage(error) {
     return detail.map((item) => item.msg).join(" ");
   }
 
-  return "Unable to complete the analysis right now. Please verify the backend is running and try again.";
+  if (error?.code === "ECONNABORTED") {
+    return "The analysis is taking longer than expected. Ollama is probably still generating locally. Please wait and try again, or use a smaller/faster local model.";
+  }
+
+  if (error?.message === "Network Error") {
+    return "Cannot reach the FastAPI backend at http://localhost:8000. Please make sure the backend server is running.";
+  }
+
+  return error?.message || "Unable to complete the analysis right now. Please verify the backend is running and try again.";
 }
 
 function Home() {

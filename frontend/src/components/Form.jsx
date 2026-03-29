@@ -27,6 +27,7 @@ function Form({ onSubmit, loading, error }) {
       income: Number(formData.income),
       expenses: Number(formData.expenses),
       savings: Number(formData.savings),
+      expense_breakdown: null,
     });
   };
 
@@ -35,7 +36,7 @@ function Form({ onSubmit, loading, error }) {
       <div className="section-heading">
         <span className="eyebrow">Personal financial snapshot</span>
         <h2>Run your AI-backed money analysis</h2>
-        <p>Share your current numbers to generate a score, investment plan, tax ideas, and a 10-year wealth view.</p>
+        <p>Share four simple numbers to generate a score, investment plan, tax ideas, and a 10-year wealth view.</p>
       </div>
 
       <form className="analysis-form" onSubmit={handleSubmit}>

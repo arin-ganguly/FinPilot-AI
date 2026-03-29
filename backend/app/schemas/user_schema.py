@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
+from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 
@@ -11,12 +12,29 @@ class RiskAppetite(str, Enum):
     high = "high"
 
 
+class ExpenseBreakdownInput(BaseModel):
+    rent: float = Field(0, ge=0)
+    food: float = Field(0, ge=0)
+    transport: float = Field(0, ge=0)
+    entertainment: float = Field(0, ge=0)
+    others: float = Field(0, ge=0)
+
+    @field_validator("rent", "food", "transport", "entertainment", "others")
+    @classmethod
+    def round_currency_values(cls, value: float) -> float:
+        return round(value, 2)
+
+    def total(self) -> float:
+        return round(self.rent + self.food + self.transport + self.entertainment + self.others, 2)
+
+
 class AnalyzeRequest(BaseModel):
     age: int = Field(..., ge=18, le=100, description="User age in years")
     income: float = Field(..., gt=0, description="Monthly net income in INR")
     expenses: float = Field(..., ge=0, description="Monthly expenses in INR")
     savings: float = Field(..., ge=0, description="Current liquid savings in INR")
     risk_appetite: RiskAppetite
+    expense_breakdown: ExpenseBreakdownInput | None = None
 
     @field_validator("income", "expenses", "savings")
     @classmethod
@@ -25,6 +43,8 @@ class AnalyzeRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_financials(self) -> "AnalyzeRequest":
+        resolved_expenses = self.expense_breakdown.total() if self.expense_breakdown else self.expenses
+        self.expenses = round(resolved_expenses, 2)
         if self.expenses > self.income * 1.5:
             raise ValueError("Expenses look unusually high. Please review the entered monthly values.")
         return self
@@ -61,6 +81,17 @@ class InvestmentPlan(BaseModel):
     narrative: str
 
 
+class ExpenseDistributionItem(BaseModel):
+    category: str
+    amount: float
+    percentage: float
+
+
+class ExpenseBreakdownResponse(BaseModel):
+    total_expenses: float
+    categories: list[ExpenseDistributionItem]
+
+
 class AnalyzeResponse(BaseModel):
     health_score: int
     score_breakdown: ScoreBreakdown
@@ -68,3 +99,47 @@ class AnalyzeResponse(BaseModel):
     tax_suggestions: list[str]
     future_projection: list[ProjectionPoint]
     ai_advice: str
+    expense_breakdown: ExpenseBreakdownResponse
+
+
+class GoalPlanRequest(BaseModel):
+    goal_name: str = Field(..., min_length=2, max_length=80)
+    target_amount: float = Field(..., gt=0)
+    years: int = Field(..., ge=1, le=40)
+    current_sip: float = Field(..., ge=0)
+    monthly_surplus: float | None = Field(None, ge=0)
+
+    @field_validator("target_amount", "current_sip", "monthly_surplus")
+    @classmethod
+    def round_goal_values(cls, value: float | None) -> float | None:
+        if value is None:
+            return value
+        return round(value, 2)
+
+
+class GoalPlanResponse(BaseModel):
+    goal_name: str
+    required_sip: float
+    current_sip: float
+    gap: float
+    feasibility_status: str
+
+
+class FinancialContext(AnalyzeRequest):
+    health_score: int | None = Field(None, ge=0, le=100)
+    current_sip: float | None = Field(None, ge=0)
+
+
+class ChatMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(..., min_length=1, max_length=4000)
+
+
+class ChatRequest(BaseModel):
+    message: str = Field(..., min_length=1, max_length=2000)
+    financial_data: FinancialContext
+    history: list[ChatMessage] = Field(default_factory=list)
+
+
+class ChatResponse(BaseModel):
+    reply: str

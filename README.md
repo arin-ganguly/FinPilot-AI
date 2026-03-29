@@ -87,6 +87,7 @@ Update `backend/.env` if needed:
 ```env
 OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=llama3.2:3b
+OLLAMA_TIMEOUT_SECONDS=90
 DATABASE_URL=sqlite:///./finpilot.db
 FRONTEND_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 ```
@@ -104,6 +105,7 @@ ollama pull llama3.2:3b
 4. Keep the Ollama server running locally. By default it serves at `http://localhost:11434`.
 
 You can replace `llama3.2:3b` with another local model if you prefer, then update `OLLAMA_MODEL` in `backend/.env`.
+A smaller model can respond faster on CPU-only systems.
 
 Run the API server:
 
@@ -173,6 +175,7 @@ curl -X POST http://localhost:8000/analyze \
 
 ## Notes
 
+- The first Ollama request can be noticeably slower because the model may need to load into memory.
 - If Ollama is not running or the local model is unavailable, the backend returns practical fallback advice so the app still works locally.
 - SQLite data is stored in `backend/finpilot.db`.
 - The what-if simulator on the results page uses the same SIP formula client-side for instant exploration.

@@ -10,6 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.db import Base, engine
 from app.routes.analyze import router as analyze_router
+from app.routes.chat import router as chat_router
+from app.routes.goal_plan import router as goal_plan_router
 
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
@@ -23,8 +25,8 @@ async def lifespan(_: FastAPI):
 
 app = FastAPI(
     title="FinPilot AI API",
-    version="1.0.0",
-    description="Personal Financial Decision Engine for scoring, planning, and AI-guided insights.",
+    version="1.1.0",
+    description="Personal Financial Decision Engine for scoring, planning, goal setting, and AI-guided insights.",
     lifespan=lifespan,
 )
 
@@ -43,6 +45,8 @@ app.add_middleware(
 )
 
 app.include_router(analyze_router)
+app.include_router(goal_plan_router)
+app.include_router(chat_router)
 
 
 @app.get("/health", tags=["health"])
