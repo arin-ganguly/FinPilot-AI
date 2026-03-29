@@ -2,6 +2,9 @@ import { useState } from "react";
 
 import ChartComponent from "./ChartComponent";
 import GoalPlanner from "./GoalPlanner";
+import InfoTip from "./InfoTip";
+import InvestmentStrategy from "./InvestmentStrategy";
+import financeGlossary from "../constants/financeGlossary";
 
 const currencyFormatter = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -43,15 +46,24 @@ function Dashboard({ result, inputs }) {
             <strong>{result.health_score}/100</strong>
           </article>
           <article className="summary-pill compact-pill">
-            <span>Monthly surplus</span>
+            <div className="label-with-tip">
+              <span>Monthly surplus</span>
+              <InfoTip text={financeGlossary.surplus} />
+            </div>
             <strong>{currencyFormatter.format(result.score_breakdown.monthly_surplus)}</strong>
           </article>
           <article className="summary-pill compact-pill">
-            <span>Recommended SIP</span>
+            <div className="label-with-tip">
+              <span>Recommended SIP</span>
+              <InfoTip text={financeGlossary.sip} />
+            </div>
             <strong>{currencyFormatter.format(result.investment_plan.recommended_monthly_sip)}</strong>
           </article>
           <article className="summary-pill compact-pill">
-            <span>Projected corpus</span>
+            <div className="label-with-tip">
+              <span>Projected corpus</span>
+              <InfoTip text={financeGlossary.corpus} />
+            </div>
             <strong>{currencyFormatter.format(result.investment_plan.projected_corpus)}</strong>
           </article>
         </div>
@@ -120,6 +132,10 @@ function Dashboard({ result, inputs }) {
         <p className="subtle-copy">{result.investment_plan.allocation_hint}</p>
       </section>
 
+      <div className="dashboard-strategy-zone fade-up">
+        <InvestmentStrategy strategy={result.investment_strategy} />
+      </div>
+
       <div className="dashboard-chart-zone fade-up">
         <ChartComponent futureProjection={result.future_projection} />
       </div>
@@ -150,6 +166,20 @@ function Dashboard({ result, inputs }) {
           <span className="eyebrow">Tax planning</span>
           <h3>India-specific saving ideas</h3>
         </div>
+        <div className="glossary-chip-row">
+          <div className="glossary-chip">
+            <span>80C</span>
+            <InfoTip text={financeGlossary.section80c} />
+          </div>
+          <div className="glossary-chip">
+            <span>ELSS</span>
+            <InfoTip text={financeGlossary.elss} />
+          </div>
+          <div className="glossary-chip">
+            <span>PPF</span>
+            <InfoTip text={financeGlossary.ppf} />
+          </div>
+        </div>
         <ul className="insight-list compact-list">
           {result.tax_suggestions.map((suggestion) => (
             <li key={suggestion}>{suggestion}</li>
@@ -167,7 +197,11 @@ function Dashboard({ result, inputs }) {
           <h3>Test a different SIP</h3>
         </div>
         <label className="slider-label" htmlFor="sip-range">
-          Monthly SIP: <strong>{currencyFormatter.format(simulatorSip)}</strong>
+          <span className="label-with-tip">
+            <span>Monthly SIP</span>
+            <InfoTip text={financeGlossary.sip} />
+          </span>
+          <strong>{currencyFormatter.format(simulatorSip)}</strong>
         </label>
         <input
           id="sip-range"
@@ -180,7 +214,10 @@ function Dashboard({ result, inputs }) {
           onChange={(event) => setSimulatorSip(Number(event.target.value))}
         />
         <div className="simulator-output">
-          <span>Projected 10-year corpus</span>
+          <div className="label-with-tip">
+            <span>Projected 10-year corpus</span>
+            <InfoTip text={financeGlossary.corpus} />
+          </div>
           <strong>{currencyFormatter.format(projectedSimulatorValue)}</strong>
         </div>
       </section>

@@ -16,6 +16,7 @@ from app.services.calculator import (
     calculate_future_value,
     recommend_monthly_investment,
 )
+from app.services.investment_engine import build_investment_strategy
 from app.services.scoring import calculate_health_score
 
 
@@ -45,6 +46,7 @@ async def analyze_finances(payload: AnalyzeRequest, db: Session = Depends(get_db
     future_projection = build_projection(monthly_sip)
     projected_corpus = calculate_future_value(monthly_sip)
     expense_breakdown = build_expense_breakdown(payload.expense_breakdown, total_expenses)
+    investment_strategy = build_investment_strategy(payload.risk_appetite)
 
     ai_result = await generate_financial_advice(payload)
     tax_suggestions = _split_tax_tips(ai_result["tax_tips"])
@@ -72,6 +74,7 @@ async def analyze_finances(payload: AnalyzeRequest, db: Session = Depends(get_db
             allocation_hint=allocation_hint(payload.risk_appetite),
             narrative=ai_result["investment_plan"],
         ),
+        investment_strategy=investment_strategy,
         tax_suggestions=tax_suggestions,
         future_projection=future_projection,
         ai_advice=ai_result["advice"],

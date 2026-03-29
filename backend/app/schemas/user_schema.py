@@ -92,10 +92,33 @@ class ExpenseBreakdownResponse(BaseModel):
     categories: list[ExpenseDistributionItem]
 
 
+class MarketDataSnapshot(BaseModel):
+    symbol: str
+    current_price: float | None = None
+    one_year_return_pct: float | None = None
+    as_of: str | None = None
+
+
+class InvestmentRecommendation(BaseModel):
+    name: str
+    type: str
+    risk_level: str
+    expected_return_range: str
+    market_data: MarketDataSnapshot | None = None
+
+
+class InvestmentStrategy(BaseModel):
+    allocation: dict[str, int]
+    recommendations: list[InvestmentRecommendation]
+    reasoning: str
+    disclaimer: str
+
+
 class AnalyzeResponse(BaseModel):
     health_score: int
     score_breakdown: ScoreBreakdown
     investment_plan: InvestmentPlan
+    investment_strategy: InvestmentStrategy
     tax_suggestions: list[str]
     future_projection: list[ProjectionPoint]
     ai_advice: str
